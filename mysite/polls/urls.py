@@ -5,6 +5,7 @@ from . import views
 # what if there are other apps with similar path names?
 # no problem, add a namespace!:
 
+#does the namespace break the app?
 app_name = 'polls'
 
 urlpatterns = [
@@ -12,7 +13,7 @@ urlpatterns = [
 	path('', views.index, name='index'),
 	# ex: /polls/5/
 	# also: the 'name' value as called by the {% url %} template tag
-	#path('<int:question_id>/', views.detail, name='detail'),
+	path('<int:question_id>/', views.detail, name='detail'),
 	#adding the word 'specifics' to the url (polls/specifics/123)
 	path('specifics/<int:question_id>/', views.detail, name='detail'),
 	# ex: /polls/5/results/
