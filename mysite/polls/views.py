@@ -1,73 +1,48 @@
-#from django.http import Http404
+#rewriting this to use generic views.  Roll back in Github to see the "long way"
+
+
 from django.shortcuts import get_object_or_404, render
-
-#these are now farmed out to render
-from django.http import HttpResponseRedirect, HttpResponse
-#from django.template import loader
-
+from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.views import generic
 
 from .models import Choice, Question
 
 
-def index(request):
-	#return HttpResponse("Hello world!  Dave rules!  This is the polls index.")
-	
-	#you could code your pages here but then there wouldn't be a separation of concerns! 
-	#the template lives at /template/polls/index.html
-	latest_question_list = Question.objects.order_by('-pub_date')[:5]
-	
-	#2nd change, farming this out to render
-	#template = loader.get_template('polls/index.html')
-	#return HttpResponse(template.render(context, request))
+class IndexView(generic.ListView):
+	template_name = 'polls/index.html'
+	context_object_name = 'latest_question_list'
+
+	def get_queryset(self):
+		"""Return the last five published questions."""
+		return Question.objects.order_by('-pub_date')[:5]
 
 
-	#1st change, use a template
-	#output = ', '.join([q.question_text for q in latest_question_list])
-	#return HttpResponse(output)
-	
-	context = {'latest_question_list': latest_question_list}
-	return render(request, 'polls/index.html', context)
+class DetailView(generic.DetailView):
+	model = Question
+	template_name = 'polls/detail.html'
 
 
-def detail(request, question_id):
-	#changing this to throw a 404 if question not found
-	#return HttpResponse("You're looking at question %s." % question_id)
+class ResultsView(generic.DetailView):
+	model= Question
+	template_name = 'polls/results.html'
 
-	#another change, the try/except can be called with get_object_or_404()
-	#try:
-	#	question = Question.objects.get(pk=question_id)
-	#except Question.DoesNotExist:
-	#	raise Http404("Sorry, that question does not exist!")
-	
-	#what is
-	question = get_object_or_404(Question, pk=question_id)
-	return render(request, 'polls/detail.html',{'question':question})
-
-def results(request, question_id):
-	# placeholder
-	# response = "You're looking at the results of question %s."
-	# return HttpResponse(response % question_id)
-	question = get_object_or_404(Question, pk=question_id)
-	return render(request, 'polls/results.html', {'question':question})
 
 def vote(request, question_id):
-	# placeholder
-	# return HttpResponse("You're voting on question %s." % question_id)
-
+	#what is difference between HttpResponse and HttpResponseRedirect?
 	question = get_object_or_404(Question, pk=question_id)
-	try: 
+	try:
 		selected_choice = question.choice_set.get(pk=request.POST['choice'])
 	except (KeyError, Choice.DoesNotExist):
 		#redisplay the question voting form
 		return render(request, 'polls/detail.html', {
-				'question': question,
-				'error_message': "You didn't make a choice!",
-			})
+			'question': question,
+			'error_message': "You didn't select anything!",
+		})
 	else:
 		selected_choice.votes += 1
 		selected_choice.save()
-		# Always return an HttpResponseRedirect after successfully dealing
-		# with POST data.  This prevents data from being posted twice if the
-		# user hits the back button.
+		#always return an HttpResponseRedirect after successfully dealing
+		#with POST data.  This prevents data from being posted twice if the
+		#user hits the back button.
 		return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
