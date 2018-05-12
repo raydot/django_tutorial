@@ -1,5 +1,7 @@
 <!--what language is this?!-->
 <!--Django has its own: https://docs.djangoproject.com/en/2.0/topics/templates/-->  
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'polls/style.css' %}">
 {% if latest_question_list %}
 	<ul>
 	{% for question in latest_question_list %}

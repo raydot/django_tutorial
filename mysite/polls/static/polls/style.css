@@ -1,0 +1,9 @@
+/* Stylesheet inside /polls/static/polls/style.css */
+
+body {
+	background-image white url("images/background.jpg") no-repeat;
+}
+
+li a {
+	color: green;
+}
